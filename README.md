@@ -48,3 +48,7 @@ Features:
   Waiting for results from jobs [67097, 67098, 67198]
   ```
   This module is therefore compatible with compute clusters that dont allow executing long tasks on the login nodes.
+
+  # Installation
+
+  Clone the repository, `cd` into it and run `pip install .`
