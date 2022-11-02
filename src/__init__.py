@@ -1,0 +1,1 @@
+from .slurm_map import map
