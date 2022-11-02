@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slurm_map"
+version = "0.0.1"
+authors = [
+  { name="Tobias Schmale", email="tobias.schmale@itp.uni-hannover.de" },
+]
+description = "Very simple parallel for-loops based on slurm!"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+keywords = [
+    "slurm", "hpc", "cluster", "parallel for-loop",
+    "parallelization", "embarissingly parallel", "map"
+]
+dependencies = [
+    "dill"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/pypa/sampleproject"
+"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
