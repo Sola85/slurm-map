@@ -1,4 +1,4 @@
-# slrum-map
+# slurm-map
 Very simple parallel for-loops based on slurm!
 
 # Usage
