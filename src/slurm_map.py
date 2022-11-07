@@ -55,7 +55,7 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
     """
 
     if slurm_args is None:
-        slurm_args = []
+        slurm_args = ""
     if extra_commands is None:
         extra_commands = []
 
