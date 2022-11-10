@@ -1,6 +1,7 @@
 from pathlib import Path
 import string, random, os, subprocess, time, threading
 from typing import List, Any
+import shutil
 
 import dill as pickle
 
@@ -38,8 +39,10 @@ def jobs_running(job_ids: List[str]) -> List[bool]:
     running = [str(job_id) in squeue for job_id in job_ids]
     return running
 
-def unpickleWithTimeout(filename: str, num_tries=10) -> Any:
+def unpickleWithTimeout(filename: str, num_tries=10, raise_on_failure=False) -> Any:
     """Tries multiple times to unpickle a particular file."""
+
+    if num_tries < 1: num_tries = 1
 
     for _ in range(num_tries):
         try:
@@ -49,4 +52,29 @@ def unpickleWithTimeout(filename: str, num_tries=10) -> Any:
             print("Waiting for file", filename)
             time.sleep(1)
     print("ERROR: Stopping to wait for file", filename)
-    return None #raise Exception(f"File {filename} failed to unpickle or does not exist...")
+    if raise_on_failure:
+        raise Exception(f"File {filename} failed to unpickle or does not exist...")
+    return None 
+
+def robust_rmtree(path, logger=None, max_retries=6):
+    """Robustly tries to delete paths.
+    Retries several times (with increasing delays) if an OSError
+    occurs.  If the final attempt fails, the Exception is propagated
+    to the caller.
+    """
+    if not os.path.isdir(path): return
+
+    dt = 1
+    for i in range(max_retries):
+        try:
+            shutil.rmtree(path)
+            return
+        except OSError:
+            if logger:
+                logger.info('Unable to remove path: %s' % path)
+                logger.info('Retrying after %d seconds' % dt)
+            time.sleep(dt)
+            dt *= 2
+
+    # Final attempt, pass any Exceptions up to caller.
+    shutil.rmtree(path)
