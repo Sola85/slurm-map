@@ -92,7 +92,7 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
             running = jobs_running(job_ids)
     except KeyboardInterrupt:
         stopListeners = True
-        print(f"Stopping to wait for results. Jobs will continue to run. Use 'python -m slurm_map cancel {function.__name__}' to cancel the jobs.")
+        print(f"\nStopping to wait for results. Jobs will continue to run. Use 'python -m slurm_map cancel {function.__name__}' to cancel the jobs.")
         exit()
     
     print("Jobs done, waiting for results...")
