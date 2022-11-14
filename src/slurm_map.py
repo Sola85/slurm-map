@@ -80,7 +80,6 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
     stopListeners = False
 
     def stopListenerCallback():
-        print("stop() called.", stopListeners)
         return stopListeners
 
     # Start file watchers for unfinished jobs in order to get stdout.
