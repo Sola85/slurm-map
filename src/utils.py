@@ -1,6 +1,6 @@
 from pathlib import Path
 import string, random, os, subprocess, time, threading
-from typing import List, Any
+from typing import List, Any, Callable
 import shutil
 
 import dill as pickle
@@ -12,19 +12,22 @@ def namedTemporaryFile(folder: str, name: str, mode="wb"):
     name = name.replace("#", random_chars)
     return open(os.path.join(folder, name), mode)
 
-def watchFileAsync(filepath: str) -> None:
+def watchFileAsync(filepath: str, stop: Callable) -> None:
     """Prints new data in file 'filepath' to console."""
 
     def watcher():
         while not os.path.isfile(filepath):
             # Workaround: periodically call ls in order to force any underlying filesystem to update. 
             subprocess.Popen(['ls', os.path.dirname(filepath)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            
+            if stop(): return
             time.sleep(1)
 
         f = subprocess.Popen(['tail', '-F', filepath], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         while os.path.isfile(filepath):
             line = f.stdout.readline().decode("utf-8").rstrip("\n")
             if "slurm_map saved data!" in line: break # Hack: stop when hearing a special string.
+            if stop(): return
             print(line)
     threading.Thread(target=watcher, daemon=True).start()
 

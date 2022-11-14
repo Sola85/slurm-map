@@ -32,6 +32,7 @@ results = slurm_map.map(do_something, data,
 ```
 
 Features:
+- No more batch scripts!
 - Forwarding of `stdout` and `stderr`, in other words `print` statements work
 - Interruptable! Meaning after submission, the above python script can be interrupted and the jobs will continue running. Restarting the same python script will not submit new jobs but will continue to wait for the old ones to finish! Eg:
   ```
@@ -47,8 +48,14 @@ Features:
   Jobs were already started previously. Reusing those results.
   Waiting for results from jobs [67097, 67098, 67198]
   ```
-  This module is therefore compatible with compute clusters that dont allow executing long tasks on the login nodes.
+  This module is therefore compatible with compute clusters that don't allow executing long tasks on the login nodes.
 
   # Installation
 
   Clone the repository, `cd` into it and run `pip install .`
+
+  <br>
+
+  # Disclaimer
+
+  This tool only aims to manage slurm jobs to the extent needed to provide the base-functionality of the above `map` function. If you are looking for a general-purpose python interface for slurm, you might want to look at [pyslurm](https://github.com/PySlurm/pyslurm), [simple_slurm](https://github.com/amq92/simple_slurm/), [slurm-pipline](https://github.com/acorg/slurm-pipeline), [slurm tools](https://github.com/MomsFriendlyRobotCompany/slurm)

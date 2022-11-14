@@ -10,6 +10,8 @@ from utils import robust_rmtree, unpickleWithTimeout, jobs_running, watchFileAsy
 
 SLURM_MAP_DIR = ".slurm_map"
 
+stopListeners = False
+
 def startJobs(folder: str, function: Callable, data: List[Any], slurm_args: str, extra_commands: List[str]) -> None:
     with namedTemporaryFile(folder, "function.dill") as function_file:
         pickle.dump(function, function_file, recurse=True)
@@ -74,13 +76,25 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
     
     running = jobs_running(job_ids)
 
+    global stopListeners
+    stopListeners = False
+
+    def stopListenerCallback():
+        print("stop() called.", stopListeners)
+        return stopListeners
+
     # Start file watchers for unfinished jobs in order to get stdout.
-    log_watchers = [watchFileAsync(os.path.join(folder, f"job_{i}.log")) if r else None for i, r in enumerate(running)]
+    log_watchers = [watchFileAsync(os.path.join(folder, f"job_{i}.log"), stopListenerCallback) if r else None for i, r in enumerate(running)]
 
     # Wait until all jobs are finished
-    while any(running):
-        time.sleep(1)
-        running = jobs_running(job_ids)
+    try: 
+        while any(running):
+            time.sleep(1)
+            running = jobs_running(job_ids)
+    except KeyboardInterrupt:
+        stopListeners = True
+        print(f"Stopping to wait for results. Jobs will continue to run. Use 'python -m slurm_map cancel {function.__name__}' to cancel the jobs.")
+        exit()
     
     print("Jobs done, waiting for results...")
 
