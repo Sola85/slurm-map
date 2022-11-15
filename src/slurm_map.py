@@ -40,9 +40,13 @@ def startJobs(folder: str, function: Callable, data: List[Any], slurm_args: str,
         out = p.stdout.readlines()
         for line in out:
             line_str = line.decode("utf-8").rstrip("\n")
-            print(line_str)
             if "Submitted batch job" in line_str:
                 job_ids.append(int(line_str.split(" ")[-1])) #Extract job ids from output of sbatch command
+            else:
+                print(line_str)
+
+    if len(job_ids) == len(data):
+        print(f"Submitted {len(job_ids)} jobs.")
 
     with namedTemporaryFile(folder, "job_ids.json", mode="w") as f:
         json.dump(job_ids, f)
@@ -72,7 +76,7 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
     with open(os.path.join(folder, "job_ids.json")) as f:
         job_ids = json.load(f)
     
-    print("Waiting for results from jobs", job_ids)
+    print("Waiting for results from jobs...")
     
     running = jobs_running(job_ids)
 
@@ -95,7 +99,7 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
         print(f"\nStopping to wait for results. Jobs will continue to run. Use 'python -m slurm_map cancel {function.__name__}' to cancel the jobs.")
         exit()
     
-    print("Jobs done, waiting for results...")
+    print("Jobs done, waiting for results...", end="")
 
     # collect results
     results = [None]*len(data)
@@ -115,8 +119,10 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
         iteration += 1
 
     all_succeeded = all(succeeded)
-    if not all_succeeded:
-        print(f"Warning: not all jobs returned a result. Not cleaning up. Clean up manually using 'python -m slurm_map cleanup {function.__name__}'")
+    if all_succeeded:
+        print(" Done.")
+    else:
+        print(f"\nWarning: not all jobs returned a result. Not cleaning up. Clean up manually using 'python -m slurm_map cleanup {function.__name__}'")
 
     if cleanup and all_succeeded:
         robust_rmtree(folder)
