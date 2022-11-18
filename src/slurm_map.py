@@ -25,8 +25,8 @@ def startJobs(folder: str, function: Callable, data: List[Any], slurm_args: str,
         with namedTemporaryFile(folder, f"run_{i}.slurm", mode="w") as slurm_file:
             slurm_file_contents = [
                 "#!/bin/sh",
-                f"#SBATCH --output {folder}job_{i}.log",
-                f"#SBATCH --error {folder}job_{i}.log"
+                f"#SBATCH --output" + os.path.join(folder, f"job_{i}.log"),
+                f"#SBATCH --error" + os.path.join(folder, f"job_{i}.log")
             ]
             lines = slurm_file_contents + extra_commands
             slurm_file.writelines([command + "\n" for command in lines])
