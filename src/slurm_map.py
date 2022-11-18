@@ -52,7 +52,7 @@ def startJobs(folder: str, function: Callable, data: List[Any], slurm_args: str,
         json.dump(job_ids, f)
 
 
-def map(function: Callable, data: List[Any], slurm_args: str = None, extra_commands: List[str] = None, cleanup=True) -> List[Any]:
+def map(function: Callable, data: List[Any], slurm_args: str = None, extra_commands: List[str] = None, cleanup=True, folder=None) -> List[Any]:
     """ 
         Maps function over data, where every element of data is executed as a separate slurm batch job.
         
@@ -67,7 +67,10 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
     if extra_commands is None:
         extra_commands = []
 
-    folder = f"./{SLURM_MAP_DIR}/{function.__name__}/"
+    if folder is None:
+        folder = os.path.join(".", SLURM_MAP_DIR, function.__name__) #f"./{SLURM_MAP_DIR}/{function.__name__}/")
+    else:
+        folder = os.path.join(".", SLURM_MAP_DIR, folder, function.__name__)
 
     if os.path.isfile(os.path.join(folder, "job_ids.json")):
         print("Jobs were already started previously. Reusing those results.")
