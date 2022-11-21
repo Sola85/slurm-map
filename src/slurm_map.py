@@ -31,8 +31,9 @@ def startJobs(folder: str, function: Callable, data: List[Any], slurm_args: str,
             lines = slurm_file_contents + extra_commands
             slurm_file.writelines([command + "\n" for command in lines])
 
+            python_executable = sys.executable
             # Start *this* file as a slurm job, passing it the pickled function, args and results file
-            python_command = f"python -u {os.path.abspath(__file__)} execute {function_file.name} {arg_file.name} {os.path.join(folder, f'res_{i}.dill')}\n"
+            python_command = f"{python_executable} -u {os.path.abspath(__file__)} execute {function_file.name} {arg_file.name} {os.path.join(folder, f'res_{i}.dill')}\n"
             slurm_file.writelines([python_command])
 
         
@@ -67,6 +68,8 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
     if extra_commands is None:
         extra_commands = []
 
+    folder_arg = folder
+
     if folder is None:
         folder = os.path.join(".", SLURM_MAP_DIR, function.__name__) #f"./{SLURM_MAP_DIR}/{function.__name__}/")
     else:
@@ -99,7 +102,10 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
             running = jobs_running(job_ids)
     except KeyboardInterrupt:
         stopListeners = True
-        print(f"\nStopping to wait for results. Jobs will continue to run. Use 'python -m slurm_map cancel {function.__name__}' to cancel the jobs.")
+        temp = function.__name__
+        if folder_arg is not None:
+            temp = os.path.join(folder_arg, function.__name__)
+        print(f"\nStopping to wait for results. Jobs will continue to run. Use 'python -m slurm_map cancel {temp}' to cancel the jobs.")
         exit()
     
     print("Jobs done, waiting for results...", end="")
@@ -125,7 +131,10 @@ def map(function: Callable, data: List[Any], slurm_args: str = None, extra_comma
     if all_succeeded:
         print(" Done.")
     else:
-        print(f"\nWarning: not all jobs returned a result. Not cleaning up. Clean up manually using 'python -m slurm_map cleanup {function.__name__}'")
+        temp = function.__name__
+        if folder_arg is not None:
+            temp = os.path.join(folder_arg, function.__name__)
+        print(f"\nWarning: not all jobs returned a result. Not cleaning up. Clean up manually using 'python -m slurm_map cleanup {temp}'")
 
     if cleanup and all_succeeded:
         robust_rmtree(folder)
