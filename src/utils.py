@@ -34,7 +34,7 @@ def watchFileAsync(filepath: str, stop: Callable) -> None:
 def jobs_running(job_ids: List[str]) -> List[bool]:
     """Queries squeue to check whether a list of jobs is finished or not."""
 
-    if len(job_ids) == 0: return False
+    if len(job_ids) == 0: return []
 
     squeue = subprocess.Popen(["squeue -u $(whoami)"], shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).stdout.readlines()
     squeue = "".join([s.decode("utf-8") for s in squeue])
