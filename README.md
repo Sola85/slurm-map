@@ -36,20 +36,26 @@ Features:
 - No more batch scripts!
 - Forwarding of `stdout` and `stderr`, in other words `print` statements work
 - Interruptable! Meaning after submission, the above python script can be interrupted and the jobs will continue running. Restarting the same python script will not submit new jobs but will continue to wait for the old ones to finish! Eg:
-```
-> python submit.py
-Submitted batch job 67196
-Submitted batch job 67197
-Submitted batch job 67198
-Waiting for results from jobs [67097, 67098, 67198]
-^C Keyboard interrupt
-...
+    ```
+    > python submit.py
+    Submitted batch job 67196
+    Submitted batch job 67197
+    Submitted batch job 67198
+    Waiting for results from jobs [67097, 67098, 67198]
+    ^C Keyboard interrupt
+    ...
 
-> python submit.py
-Jobs were already started previously. Reusing those results.
-Waiting for results from jobs [67097, 67098, 67198]
-```
-This module is therefore compatible with compute clusters that don't allow executing long tasks on the login nodes.
+    > python submit.py
+    Jobs were already started previously. Reusing those results.
+    Waiting for results from jobs [67097, 67098, 67198]
+    ```
+    This module is therefore compatible with compute clusters that don't allow executing long tasks on the login nodes.
+- Keyword-argument-based caching: 
+  ```python
+  slurm_map.map(f, data, cleanup=False, kwargs={'a': 1})
+  ```
+  The above call will store its results, so a second invocation does not trigger more jobs to be lauched. More jobs will only be triggered if `data` or `kwargs` change. If `data` changes, only new elements will be computed, i.e. if a previous run computed `map(f, data)` and a new call to `map(f, data+new_data)` is made, then only `f(new_data)` is actually computed, the rest is taken from cache. 
+
 
 ## Job management
 
